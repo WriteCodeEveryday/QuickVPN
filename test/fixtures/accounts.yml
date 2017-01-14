@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  public_address: MyString
+  balance: 
+  spent_balance: 
+
+two:
+  public_address: MyString
+  balance: 
+  spent_balance: 

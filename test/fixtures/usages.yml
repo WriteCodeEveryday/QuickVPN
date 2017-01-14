@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  start_time: 2017-01-14 10:56:59
+  stop_time: 2017-01-14 10:56:59
+  amount: 1
+  account_id: 1
+
+two:
+  start_time: 2017-01-14 10:56:59
+  stop_time: 2017-01-14 10:56:59
+  amount: 1
+  account_id: 1
