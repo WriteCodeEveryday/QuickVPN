@@ -7,13 +7,7 @@
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track' => 'reload' %>
     <%= csrf_meta_tags %>
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
-
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
-
-
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
     <header>
@@ -23,5 +17,16 @@
        <%= render 'layouts/messages' %>
        <%= yield %>
     </main>
+
+    <footer class="page-footer teal">
+      <div class="container">
+        <div class="row">
+          <div class="col l12 s12">
+            <h5 class="white-text">The Promise: </h5>
+            <p class="grey-text text-lighten-4">If you're not happy for any reason, we'll refund you your money. <br /> Your satisfaction is worth far more to us than a couple of pennies.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
