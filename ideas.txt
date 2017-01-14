@@ -1,0 +1,9 @@
+Quick VPN
+
+Cost: $6.95 / month
+Months to Days: ((31 * 7) + (30 * 4) + 28.25) / 12 = 30.4375
+Hours per Day: 24 hours
+Final Cost Per Hour: $ 0.011 (includes 20% markup)
+
+Flow: Sign Up -> Deposit -> Generate -> Stop -> Withdraw
+Secondary Flow: Volunteer Account (username/password/public_address)
