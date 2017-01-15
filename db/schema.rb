@@ -28,8 +28,9 @@ ActiveRecord::Schema.define(version: 20170114155809) do
     t.string   "password"
     t.integer  "account_id"
     t.string   "secret"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string   "public_address"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
   end
 
   create_table "usages", force: :cascade do |t|

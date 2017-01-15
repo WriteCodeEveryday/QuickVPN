@@ -1,0 +1,61 @@
+<div class="container">
+  <div class="section">
+    <div class="row">
+      <div class="col l6">
+        <div style="text-align:center !important" >
+          <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=bitcoin:<%= @account.public_address %>" \>
+        </div>
+        <a href="" class="btn-large teal" style="width: 100%">Refresh Balance</a>
+        <p class="text-center">Your Balance: <%= @current_balance %> BTC <br />
+        Spent Balance: <%= @spent_balance %> BTC</p>
+      </div>
+      <div class="col l6">
+        <strong style="font-size:25px">Rates</strong>
+        <div style="margin-top: 10px; margin-bottom: 10px">
+          1 minute: <div style="float: right">$<span id="one_minute">0.00019</span></div><br/>
+          10 minutes: <div style="float: right">$<span id="ten_minutes">0.0019</span></div><br/>
+          30 minutes: <div style="float: right">$<span id="thirty_minutes">0.0055</span></div><br/>
+          1 hour: <div style="float: right">$<span id="one_hour">0.011</span></div><br/>
+          6 hours: <div style="float: right">$<span id="six_hour">0.066</span></div>
+        </div>
+
+        <div>
+          <strong>Estimated Time: <div style="float: right"><span id="estimate">0 minutes</span></div></strong>
+        </div>
+
+        <% if @account.credential %>
+          <div class="alert alert-success" style="margin-top:10px">
+            <p>Username: <%= @account.credential.username %><br/>
+            Password: <%= @account.credential.password %></p>
+          </div>
+        <% else %>
+          <div id="holder" style="margin-top:10px">
+            <%= form_tag('/generate_credentials', remote: true, id: 'generate_credentials') do %>
+              <%= hidden_field :address, nil, value: @address, name: 'address', id: 'address' %>
+              <%= submit_tag 'Generate Credentials', class: 'btn-large green', style: "width: 100%" %>
+            <% end %>
+            <script>
+            $(document).ready(function()
+            {
+              $("#generate_credentials").on("ajax:success", function(e, data, status, xhr)
+              {
+                if (data.status == "success")
+                {
+                  $("#holder").html("<div class='alert alert-success'><p>Username: " + data.data[0] + "<br>Password: " + data.data[1] + "</p>")
+                }
+                else
+                {
+                  $("#holder").html("<div class='alert alert-danger'>" + data.error + "</div>")
+                }
+              }).on("ajax:error", function(e, xhr, status, error)
+              {
+                $("#holder").html("<div class='alert alert-danger'>" + error + "</div>")
+              });
+            });
+            </script>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

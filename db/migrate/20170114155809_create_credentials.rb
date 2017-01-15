@@ -5,6 +5,7 @@ class CreateCredentials < ActiveRecord::Migration[5.0]
       t.string :password
       t.integer :account_id
       t.string :secret
+      t.string :public_address
 
       t.timestamps
     end
