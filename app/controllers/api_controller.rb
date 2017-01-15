@@ -1,6 +1,15 @@
 class ApiController < ApplicationController
   protect_from_forgery with: :null_session
 
+  def withdraw_change
+    @address = params['address']
+
+    #Verify that it's not involved in ongoing operations
+    #Retrieve address
+    #Pay out 'credentials' for each usage
+    #Pay out remainder to original deposit address.
+  end
+
   def stop_credentials
     @address = params['address']
     @account = Account.find_by_public_address(@address)

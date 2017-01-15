@@ -14,15 +14,15 @@
 <div class="container">
   <div class="section">
     <div class="row">
-      <div class="col s12 l6">
+      <div class="col s12 m12 l6">
         <div style="text-align:center !important" >
-          <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=bitcoin:<%= @account.public_address %>" \>
+          <img src="https://chart.googleapis.com/chart?chs=256x256&cht=qr&chl=bitcoin:<%= @account.public_address %>" \>
         </div>
         <a href="" class="btn-large teal" style="width: 100%">Refresh Balance</a>
-        <p class="text-center">Your Balance: <%= "%f" % @current_balance %> BTC<br />
-        Spent Balance: <%= "%f" % @spent_balance %> BTC</p>
+        <p class="text-center">Your Balance: <%= "%f8" % @current_balance %> BTC<br />
+        Spent Balance: <%= "%f8" % @spent_balance %> BTC</p>
       </div>
-      <div class="col s12 l6">
+      <div class="col s12 m12 l6">
         <strong style="font-size:25px">Rates: <span style="float:right">Price: $<%= @price %></span></strong>
         <div style="margin-top: 10px; margin-bottom: 10px">
           1 minute: <div style="float: right"><span class="primary"><%= @price_one_min_satoshis %> satoshis</span><span class="secondary" style="display:none">$ <%= @price_one_min_usd %></span></div><br/>
@@ -53,21 +53,21 @@
                 {
                   if (data.status == "success")
                   {
-                    $("#holder").html("<div class='alert alert-success'><p>"+data.data+"</p>")
                     $("#countdown").hide();
                     $("#remaining_time").hide();
+                    $("#holder").html("<div class='alert alert-success'><p>"+data.data+"</p>")
                     setTimeout(function(){
                       location.reload();
-                    }, 5000);
+                    }, 2000);
                   }
                   else
                   {
-                    $("#holder").html("<div class='alert alert-danger'>" + data.error + "</div>")
+                    $("#holder").prepend("<div class='alert alert-danger'>" + data.error + "</div>")
                     location.reload()
                   }
                 }).on("ajax:error", function(e, xhr, status, error)
                 {
-                  $("#holder").html("<div class='alert alert-danger'>" + error + "</div>")
+                  $("#holder").prepend("<div class='alert alert-danger'>" + error + "</div>")
                 });
               });
             </script>
@@ -83,26 +83,42 @@
               <%= hidden_field :address, nil, value: @address, name: 'address', id: 'address' %>
               <%= submit_tag 'Generate Credentials', class: 'btn-large green', style: "width: 100%" %>
             <% end %>
+
+            <%= form_tag('/withdraw_change', remote: true, id: 'withdraw_change') do %>
+              <%= hidden_field :address, nil, value: @address, name: 'address', id: 'address' %>
+              <%= submit_tag 'Withdraw Remainder', class: 'btn-large red', style: "width: 100%" %>
+            <% end %>
+
             <script>
             $(document).ready(function()
             {
+              $("#withdraw_change").on("ajax:success", function(e, data, status, xhr){
+                if (data.status == "success"){
+                  $("#holder").html("<div class='alert alert-success'>Withdraw complete</p>");
+                  window.reload();
+                } else {
+                  $("#holder").prepend("<div class='alert alert-danger'>" + data.error + "</div>");
+                }
+              }).on("ajax:error", function(e, xhr, status, error){
+                $("#holder").html("<div class='alert alert-danger'>" + error + "</div>")
+              });
               $("#generate_credentials").on("ajax:success", function(e, data, status, xhr)
               {
                 if (data.status == "success")
                 {
                   $("#holder").html("<div class='alert alert-success'><p>Username: " + data.data[0] + "<br>Password: " + data.data[1] + "</p>")
                   var date = new Date(<%= @date_estimate.year %>, <%= @date_estimate.month %>, <%= @date_estimate.day %>);
-                  $("#countdown").attr("style","height: 50px")
+                  $("#countdown").attr("style","height: 50px");
                   $("#countdown").countdown({until: date});
-                  $("#remaining_time").text("Remaining Time: ")
+                  $("#remaining_time").text("Remaining Time: ");
                 }
                 else
                 {
-                  $("#holder").html("<div class='alert alert-danger'>" + data.error + "</div>")
+                  $("#holder").prepend("<div class='alert alert-danger'>" + data.error + "</div>");
                 }
               }).on("ajax:error", function(e, xhr, status, error)
               {
-                $("#holder").html("<div class='alert alert-danger'>" + error + "</div>")
+                $("#holder").prepend("<div class='alert alert-danger'>" + error + "</div>");
               });
             });
             </script>
@@ -110,7 +126,7 @@
         <% end %>
       </div>
         <% if @account_usage_past.count > 0 %>
-        <div class="col s12 l12">
+        <div class="col s12 m12 l12">
           <div style="margin-top: 20px">
             <strong>Past Uses</strong>
             <table class="highlight responsive centered">
@@ -126,7 +142,7 @@
                 <tr>
                   <td> <%= object.start_time.strftime("%m/%d/%Y") %></td>
                   <td> <%= distance_of_time_in_words(object.start_time, object.stop_time) %></td>
-                  <td> <%= "%f" % (object.amount / 100000000.0) %> </td>
+                  <td> <%= "%f8" % (object.amount / 100000000.0) %> BTC</td>
                 </tr>
                 <% end %>
               </tbody>

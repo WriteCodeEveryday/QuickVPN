@@ -6,4 +6,5 @@ Rails.application.routes.draw do
 
   post '/generate_credentials' => 'api#generate_credentials'
   post '/stop_credentials' => 'api#stop_credentials'
+  post '/withdraw_change' => 'api#withdraw_change'
 end

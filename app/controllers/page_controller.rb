@@ -7,6 +7,9 @@ class PageController < ApplicationController
   def makemoney
   end
 
+  def cancelmakemoney
+  end
+
   def signup
     @data = BlockIo.get_new_address
     if @data['status'] == "success"
