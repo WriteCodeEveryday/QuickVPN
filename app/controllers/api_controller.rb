@@ -1,6 +1,60 @@
 class ApiController < ApplicationController
   protect_from_forgery with: :null_session
 
+  def stop_credentials
+    @address = params['address']
+    @account = Account.find_by_public_address(@address)
+    @credential = @account.credential
+    @usage = @account.usages.where(stop_time: nil).first
+    @result = {
+
+    }
+
+    if @account && @credential && @usage
+      #Get the last updated amount
+      HTTParty.get("http://#{request.host}/address/#{@address}")
+
+      @usage.stop_time = DateTime.now
+      @usage.save
+
+      @credential.username = ""
+      @credential.password = ""
+      @credential.account_id = nil
+      @credential.save
+
+      @vpnUser = @credential.secret.split(":")[0]
+      @vpnPassword = @credential.secret.split(":")[1]
+      a = Mechanize.new { |agent|
+      	# Allow rerfresh
+      	agent.follow_meta_refresh = true
+      }
+
+      a.get('https://www.privateinternetaccess.com/pages/client-sign-in') do |signin_page|
+      	my_page = signin_page.form_with(:class=>'signin__form') do |form|
+      		#User form field names
+      		form.user = @vpnUser
+      		form.pass = @vpnPassword
+      	end.submit
+
+      	#Find the reset credential form.
+      	my_page = my_page.form_with(:action=>'https://www.privateinternetaccess.com/pages/ccp-gen-x-password') do |regen_form|
+      		#Find the value for user name.
+      		#Find the value for password.
+      	end.submit
+      end
+
+      @result['status'] = "success"
+      @result['data'] = "Thank you for your patronage."
+      @result['code'] = 200
+    else
+      @result['status'] = "error"
+      @result['message'] = "Error: Could Not Close Connection (This Should Not Happen)"
+      @result['code'] = 404
+    end
+
+    render json: @result
+  end
+
   def generate_credentials
     @address = params['address']
     @account = Account.find_by_public_address(@address)
@@ -40,7 +94,7 @@ class ApiController < ApplicationController
       		values.push(a.inner_html)
       	end
 
-        @usage = Usage.new(start_time: DateTime.now, account_id: @account.id, credential_id: @credential.id)
+        @usage = Usage.new(start_time: DateTime.now, account_id: @account.id, credential_id: @credential.id, amount: 0)
         @usage.save!
 
         @credential.account_id = @account.id
