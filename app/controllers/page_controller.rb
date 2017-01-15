@@ -7,7 +7,7 @@ class PageController < ApplicationController
   def makemoney
   end
 
-  def cancelmakemoney
+  def makemoneysettings
   end
 
   def signup

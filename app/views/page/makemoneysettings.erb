@@ -1,0 +1,55 @@
+<div class="container">
+  <div class="section">
+    <div class="row">
+      <div id="holder" style="width:100%"></div>
+      <div class="col l12 center">
+        <%= form_tag('/get_balance',remote: true, id: 'get_balance') do %>
+          <%= label_tag :public_address, 'Public Address' %>
+          <%= text_field :public_address, nil, name: 'public_address', id: 'public_address' %>
+          <%= submit_tag 'Retrieve Pending Balance', class: 'btn-large green', style: "width: 100%" %>
+        <% end %>
+      </div>
+
+      <div class="col l12 center">
+        <%= form_tag('/remove_credentials',remote: true, id: 'remove_credentials') do %>
+          <%= label_tag :public_address, 'Public Address' %>
+          <%= text_field :public_address, nil, name: 'public_address', id: 'public_address' %>
+          <%= submit_tag 'Remove Account', class: 'btn-large red', style: "width: 100%", :data => {:confirm => 'Are you sure? All outstanding balance will be forfeit immediately.'} %>
+        <% end %>
+      </div>
+
+      <script>
+        $("#get_balance").on("ajax:success", function(e, data, status, xhr)
+        {
+          if (data.status == "success")
+          {
+            $("#holder").html("<div class='alert alert-success'><p>"+data.data+"</p>")
+          }
+          else
+          {
+            $("#holder").html("<div class='alert alert-danger'>" + data.message + "</div>")
+          }
+        }).on("ajax:error", function(e, xhr, status, error)
+        {
+          $("#holder").html("<div class='alert alert-danger'>Error while retrieving balance</div>")
+        });
+
+        $("#remove_account").on("ajax:success", function(e, data, status, xhr)
+        {
+          if (data.status == "success")
+          {
+            $("#holder").html("<div class='alert alert-success'><p>"+data.data+"</p>")
+            window.history.back();
+          }
+          else
+          {
+            $("#holder").html("<div class='alert alert-danger'>" + data.message + "</div>")
+          }
+        }).on("ajax:error", function(e, xhr, status, error)
+        {
+          $("#holder").html("<div class='alert alert-danger'>Error while removing account</div>")
+        });
+      </script>
+    </div>
+  </div>
+</div>

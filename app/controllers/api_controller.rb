@@ -1,13 +1,111 @@
 class ApiController < ApplicationController
   protect_from_forgery with: :null_session
 
+  def remove_credentials
+    @public_address = params['public_address']
+    @credentials = Credential.where(public_address: @public_address).first
+    @result = {
+
+    }
+
+    # Can only remove inactive accounts.
+    if @credentials && @credentials.account_id == nil
+      # Find all of the usages.
+      @usages = @credentials.usages
+
+      # Remove usages while keeping the id for the account.
+      @usages.each do |obj|
+        @account = Account.find_by_id(obj.account_id)
+        obj.delete
+
+        # Recalculate accounts.
+        @account.spent_balance = @account.usages.sum(:amount)
+        @account.save
+      end
+
+      # Remove credentials.
+      @credentials.delete
+
+      @result['status'] = "success"
+      @result['data'] = "Account successfully purged."
+      @result['code'] = 200
+    else
+      @result['status'] = "error"
+      @result['data'] = "Error: Incorrect Address"
+      @result['code'] = 404
+    end
+
+    render json: @result
+  end
+
+  def get_balance
+    @public_address = params['public_address']
+    @credentials = Credential.where(public_address: @public_address).first
+    @result = {
+
+    }
+
+    # Only process if that address exists.
+    if @credentials
+      @btc = "%f8" % (@credentials.usages.sum(:amount) / 100000000.0)
+      @result['status'] = "success"
+      @result['data'] = "Balance: #{@btc} BTC"
+      @result['code'] = 200
+    else
+      @result['status'] = "error"
+      @result['message'] = "Error: Incorrect Address"
+      @result['code'] = 404
+    end
+
+    render json: @result
+  end
+
+  def add_credentials
+    @username = params['username']
+    @password = params['password']
+    @public_address = params['public_address']
+    @result = {
+
+    }
+
+    @vpnUser = @username
+    @vpnPassword = @password
+    a = Mechanize.new { |agent|
+      # Allow rerfresh
+      agent.follow_meta_refresh = true
+    }
+
+    a.get('https://www.privateinternetaccess.com/pages/client-sign-in') do |signin_page|
+      my_page = signin_page.form_with(:class=>'signin__form') do |form|
+        #User form field names
+        form.user = @vpnUser
+        form.pass = @vpnPassword
+      end.submit
+
+      if my_page.uri.path == "/pages/client-control-panel"
+        @creds = Credential.new(secret: "#{@username}:#{@password}", public_address: @public_address, account_id: nil)
+        @creds.save!
+
+        @result['status'] = "success"
+        @result['data'] = "Storage Complete"
+        @result['code'] = 200
+      else
+        @result['status'] = "error"
+        @result['message'] = "Error: Credentials incorrect"
+        @result['code'] = 404
+      end
+
+      render json: @result
+    end
+  end
+
   def withdraw_change
     @address = params['address']
 
-    #Verify that it's not involved in ongoing operations
-    #Retrieve address
-    #Pay out 'credentials' for each usage
-    #Pay out remainder to original deposit address.
+    #XXX Verify that it's not involved in ongoing operations
+    #XXX Retrieve address
+    #XXX Pay out 'credentials' for each usage
+    #XXX Pay out remainder to original deposit address.
   end
 
   def stop_credentials
@@ -23,14 +121,17 @@ class ApiController < ApplicationController
       #Get the last updated amount
       HTTParty.get("http://#{request.host}/address/#{@address}")
 
+      #Update the last usage time.
       @usage.stop_time = DateTime.now
       @usage.save
 
+      #Clear credentials.
       @credential.username = ""
       @credential.password = ""
       @credential.account_id = nil
       @credential.save
 
+      #Reset password just to be sure.
       @vpnUser = @credential.secret.split(":")[0]
       @vpnPassword = @credential.secret.split(":")[1]
       a = Mechanize.new { |agent|
@@ -38,6 +139,7 @@ class ApiController < ApplicationController
       	agent.follow_meta_refresh = true
       }
 
+      #Login, reset and go
       a.get('https://www.privateinternetaccess.com/pages/client-sign-in') do |signin_page|
       	my_page = signin_page.form_with(:class=>'signin__form') do |form|
       		#User form field names
@@ -47,8 +149,7 @@ class ApiController < ApplicationController
 
       	#Find the reset credential form.
       	my_page = my_page.form_with(:action=>'https://www.privateinternetaccess.com/pages/ccp-gen-x-password') do |regen_form|
-      		#Find the value for user name.
-      		#Find the value for password.
+      		#Just reset the password.
       	end.submit
       end
 
@@ -67,7 +168,7 @@ class ApiController < ApplicationController
   def generate_credentials
     @address = params['address']
     @account = Account.find_by_public_address(@address)
-    @credential = Credential.where(account_id: nil).first
+    @credential = Credential.where(account_id: nil).order("RANDOM()").first
     @result = {
 
     }
@@ -97,15 +198,18 @@ class ApiController < ApplicationController
       		#Find the value for password.
       	end.submit
 
+        #Save username/password
       	values = []
       	parsed_page = Nokogiri::HTML(my_page.body)
       	parsed_page.css('form').css('p').css('strong').map do |a|
       		values.push(a.inner_html)
       	end
 
+        #Begin a usage period.
         @usage = Usage.new(start_time: DateTime.now, account_id: @account.id, credential_id: @credential.id, amount: 0)
-        @usage.save!
+        @usage.save
 
+        #Assign credentials to specific account.
         @credential.account_id = @account.id
         @credential.username = values[0]
         @credential.password = values[1]

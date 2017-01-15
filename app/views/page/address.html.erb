@@ -51,20 +51,7 @@
 
                 $("#stop_credentials").on("ajax:success", function(e, data, status, xhr)
                 {
-                  if (data.status == "success")
-                  {
-                    $("#countdown").hide();
-                    $("#remaining_time").hide();
-                    $("#holder").html("<div class='alert alert-success'><p>"+data.data+"</p>")
-                    setTimeout(function(){
-                      location.reload();
-                    }, 2000);
-                  }
-                  else
-                  {
-                    $("#holder").prepend("<div class='alert alert-danger'>" + data.error + "</div>")
-                    location.reload()
-                  }
+                  location.reload();
                 }).on("ajax:error", function(e, xhr, status, error)
                 {
                   $("#holder").prepend("<div class='alert alert-danger'>" + error + "</div>")
@@ -75,7 +62,7 @@
 
           <%= form_tag('/stop_credentials', remote: true, id: 'stop_credentials') do %>
             <%= hidden_field :address, nil, value: @address, name: 'address', id: 'address' %>
-            <%= submit_tag 'Stop VPN', class: 'btn-large red', style: "width: 100%" %>
+            <%= submit_tag 'Stop VPN', class: 'btn-large red', style: "width: 100%", :data => {:confirm => 'Are you sure? All balances will be settled on chain'} %>
           <% end %>
         <% elsif @current_balance > 0 %>
           <div id="holder" style="margin-top:10px">
@@ -97,7 +84,8 @@
                   $("#holder").html("<div class='alert alert-success'>Withdraw complete</p>");
                   window.reload();
                 } else {
-                  $("#holder").prepend("<div class='alert alert-danger'>" + data.error + "</div>");
+                  $("#holder").prepend("<div class='alert alert-danger'>Error withdrawing</div>");
+                  window.reload();
                 }
               }).on("ajax:error", function(e, xhr, status, error){
                 $("#holder").html("<div class='alert alert-danger'>" + error + "</div>")
@@ -114,11 +102,11 @@
                 }
                 else
                 {
-                  $("#holder").prepend("<div class='alert alert-danger'>" + data.error + "</div>");
+                  $("#holder").prepend("<div class='alert alert-danger'>" + data.message + "</div>");
                 }
               }).on("ajax:error", function(e, xhr, status, error)
               {
-                $("#holder").prepend("<div class='alert alert-danger'>" + error + "</div>");
+                $("#holder").prepend("<div class='alert alert-danger'>Error getting new credentials</div>");
               });
             });
             </script>
