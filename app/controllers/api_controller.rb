@@ -47,7 +47,7 @@ class ApiController < ApplicationController
 
     # Only process if that address exists.
     if @credentials
-      @btc = "%f8" % (@credentials.usages.sum(:amount) / 100000000.0)
+      @btc = "%f" % (@credentials.usages.sum(:amount) / 100000000.0)
       @result['status'] = "success"
       @result['data'] = "Balance: #{@btc} BTC"
       @result['code'] = 200
@@ -101,11 +101,74 @@ class ApiController < ApplicationController
 
   def withdraw_change
     @address = params['address']
+    @account = Account.find_by_public_address(@address)
+    @credential = @account.credential
+    @result = {
+
+    }
 
     #XXX Verify that it's not involved in ongoing operations
-    #XXX Retrieve address
-    #XXX Pay out 'credentials' for each usage
-    #XXX Pay out remainder to original deposit address.
+    if @account && !@credential
+      @to_addresses = ""
+      @amount = ""
+
+      #XXX Pay out 'credentials' for each usage
+      @to_addresses = Credential.where(id: @account.usages.pluck(:credential_id)).pluck(:public_address).join(",")
+      @from_addresses = @account.public_address
+      @amount = @account.usages.pluck(:amount).map { |n| (n / 100000000.0) * 0.7 }.join(",")
+
+
+      #XXX Pay out remainder to original deposit address.
+      @incoming_tx = BlockIo.get_transactions :type => 'received', :addresses => "#{@account.public_address}"
+      @incoming_address = @incoming_tx['data']['txs'][0]['senders'][0]
+      @to_addresses += ",#{@incoming_address}"
+      @temp_amount = ((@account.wallet_balance - @account.spent_balance) / 100000000.0)
+
+      #XXX Estimate out fees and substract from the VPN client fees.
+      @fees = BlockIo.get_network_fee_estimate :amounts => "#{@amount},#{@temp_amount}", :to_addresses => @to_addresses
+      @fees = @fees['data']['estimated_network_fee'].to_f
+      @amount += ",#{@temp_amount - @fees}"
+
+      @transfer = BlockIo.withdraw :amounts => @amount, :to_addresses => @to_addresses, :from_addresses => @from_addresses, :pin => ENV['BLOCK_PIN']
+      if @transfer['status'] == "success"
+        @account.delete
+        @result['status'] = "success"
+        @result['data'] = "TX Hash: #{@transfer['data']['txid']}"
+        @result['code'] = 200
+      else
+        @result['status'] = "error"
+        @result['message'] = "TX Hash: #{@transfer['data']['message']}"
+        @result['code'] = 200
+      end
+      # {
+      #   "status" : "success",
+      #   "data" : {
+      #     "network" : "BTCTEST",
+      #     "txid" : "59119b6e41822023786fa516296636534cbc87884248d01a65bc1a78fad75b7b",
+      #     "amount_withdrawn" : "0.01000000",
+      #     "amount_sent" : "0.00980000",
+      #     "network_fee" : "0.00020000",
+      #     "blockio_fee" : "0.00000000"
+      #   }
+      # } - Success Outcome.
+
+      # {
+      #   "status" : "fail",
+      #   "data" : {
+      #     "error_message" : "Cannot withdraw funds without Network Fee of 0.00000 BTCTEST. Maximum withdrawable balance is 0.00000 BTCTEST.",
+      #     "available_balance" : "0.00000000",
+      #     "max_withdrawal_available" : "0.00000000",
+      #     "minimum_balance_needed" : "0.00980000",
+      #     "estimated_network_fee" : "0.00000000"
+      #   }
+      # } - Failure Outcome.
+    else
+      @result['status'] = "error"
+      @result['message'] = "Account in use. Cannot withdraw."
+      @result['code'] = 400
+    end
+
+    render json: @result
   end
 
   def stop_credentials

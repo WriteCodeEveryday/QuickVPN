@@ -19,8 +19,8 @@
           <img src="https://chart.googleapis.com/chart?chs=256x256&cht=qr&chl=bitcoin:<%= @account.public_address %>" \>
         </div>
         <a href="" class="btn-large teal" style="width: 100%">Refresh Balance</a>
-        <p class="text-center">Your Balance: <%= "%f8" % @current_balance %> BTC<br />
-        Spent Balance: <%= "%f8" % @spent_balance %> BTC</p>
+        <p class="text-center">Your Balance: <%= "%f" % @current_balance %> BTC<br />
+        Spent Balance: <%= "%f" % @spent_balance %> BTC</p>
       </div>
       <div class="col s12 m12 l6">
         <strong style="font-size:25px">Rates: <span style="float:right">Price: $<%= @price %></span></strong>
@@ -62,7 +62,7 @@
 
           <%= form_tag('/stop_credentials', remote: true, id: 'stop_credentials') do %>
             <%= hidden_field :address, nil, value: @address, name: 'address', id: 'address' %>
-            <%= submit_tag 'Stop VPN', class: 'btn-large red', style: "width: 100%", :data => {:confirm => 'Are you sure? All balances will be settled on chain'} %>
+            <%= submit_tag 'Stop VPN', class: 'btn-large red', style: "width: 100%" %>
           <% end %>
         <% elsif @current_balance > 0 %>
           <div id="holder" style="margin-top:10px">
@@ -73,7 +73,7 @@
 
             <%= form_tag('/withdraw_change', remote: true, id: 'withdraw_change') do %>
               <%= hidden_field :address, nil, value: @address, name: 'address', id: 'address' %>
-              <%= submit_tag 'Withdraw Remainder', class: 'btn-large red', style: "width: 100%" %>
+              <%= submit_tag 'Withdraw Remainder', class: 'btn-large red', style: "width: 100%", :data => {:confirm => 'Are you sure? All balances will be settled on chain'} %>
             <% end %>
 
             <script>
@@ -81,14 +81,14 @@
             {
               $("#withdraw_change").on("ajax:success", function(e, data, status, xhr){
                 if (data.status == "success"){
-                  $("#holder").html("<div class='alert alert-success'>Withdraw complete</p>");
-                  window.reload();
+                  $("#holder").html("<div class='alert alert-success'>"+data.data+"</p>");
+                  //window.reload();
                 } else {
-                  $("#holder").prepend("<div class='alert alert-danger'>Error withdrawing</div>");
+                  $("#holder").prepend("<div class='alert alert-danger'>"+data.message+"</div>");
                   window.reload();
                 }
               }).on("ajax:error", function(e, xhr, status, error){
-                $("#holder").html("<div class='alert alert-danger'>" + error + "</div>")
+                $("#holder").html("<div class='alert alert-danger'>Error withdrawing</div>")
               });
               $("#generate_credentials").on("ajax:success", function(e, data, status, xhr)
               {
@@ -130,7 +130,7 @@
                 <tr>
                   <td> <%= object.start_time.strftime("%m/%d/%Y") %></td>
                   <td> <%= distance_of_time_in_words(object.start_time, object.stop_time) %></td>
-                  <td> <%= "%f8" % (object.amount / 100000000.0) %> BTC</td>
+                  <td> <%= "%f" % (object.amount / 100000000.0) %> BTC</td>
                 </tr>
                 <% end %>
               </tbody>
