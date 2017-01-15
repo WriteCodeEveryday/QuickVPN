@@ -42,6 +42,7 @@
           <div class="alert alert-success" style="margin-top:10px">
             <p>Username: <%= @account.credential.username %><br/>
             Password: <%= @account.credential.password %></p>
+            <a href="https://www.privateinternetaccess.com/pages/client-support/#forth">PPTP VPN Instant Setup Guides</a>
             <script>
               $(document).ready(function(){
                 var date = new Date(<%= @date_estimate.year %>, <%= @date_estimate.month %>, <%= @date_estimate.day %>);
@@ -81,7 +82,7 @@
             {
               $("#withdraw_change").on("ajax:success", function(e, data, status, xhr){
                 if (data.status == "success"){
-                  $("#holder").html("<div class='alert alert-success'>"+data.data+"</p>");
+                  $("#holder").html("<div class='alert alert-success'>"+data.data+"</div>");
                   //window.reload();
                 } else {
                   $("#holder").prepend("<div class='alert alert-danger'>"+data.message+"</div>");
@@ -94,7 +95,7 @@
               {
                 if (data.status == "success")
                 {
-                  $("#holder").html("<div class='alert alert-success'><p>Username: " + data.data[0] + "<br>Password: " + data.data[1] + "</p>")
+                  $("#holder").html("<div class='alert alert-success'><p>Username: " + data.data[0] + "<br>Password: " + data.data[1] + "</p><a href='https://www.privateinternetaccess.com/pages/client-support/#forth'>PPTP VPN Instant Setup Guides</a></div>")
                   var date = new Date(<%= @date_estimate.year %>, <%= @date_estimate.month %>, <%= @date_estimate.day %>);
                   $("#countdown").attr("style","height: 50px");
                   $("#countdown").countdown({until: date});
