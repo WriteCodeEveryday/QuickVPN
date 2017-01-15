@@ -21,7 +21,7 @@ class PageController < ApplicationController
 
   def address
     @price = get_price("USD")
-    @price_one_min_usd = 0.00019 * 100 #XXX Fudge factor to increase price while testing
+    @price_one_min_usd = 0.00019 #* 100 #XXX Fudge factor to increase price while testing
     @price_one_min_satoshis = ((@price_one_min_usd / @price) * 100000000).to_i
 
     @address = params['address']
