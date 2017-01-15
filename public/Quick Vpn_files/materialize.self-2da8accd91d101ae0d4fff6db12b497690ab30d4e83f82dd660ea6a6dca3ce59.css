@@ -4212,36 +4212,6 @@ nav .input-field label.active {
   }
 }
 
-@font-face {
-  font-family: "Roboto";
-  src: url(font_path("Roboto-Thin.eot"));
-  font-weight: 200;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: local(Roboto Light), url(font_path("Roboto-Light.eot"));
-  font-weight: 300;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: local(Roboto Regular), url(font_path("Roboto-Regular.eot"));
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: url(font_path("Roboto-Medium.eot"));
-  font-weight: 500;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: url(font_path("Roboto-Bold.eot"));
-  font-weight: 700;
-}
-
 a {
   text-decoration: none;
 }
